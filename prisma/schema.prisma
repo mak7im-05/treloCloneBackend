@@ -63,6 +63,8 @@ model List {
   board   Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
 
   cards Card[]
+
+  @@index([boardId])
 }
 
 model Card {
@@ -81,6 +83,10 @@ model Card {
   attachments Attachment[]
   assignees   CardAssignee[]
   labels      CardLabel[]
+
+  @@index([listId])
+  @@index([status])
+  @@index([title])
 }
 
 model Comment {
@@ -94,6 +100,8 @@ model Comment {
 
   authorId Int
   author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
 }
 
 model Label {
@@ -133,4 +141,6 @@ model Attachment {
 
   cardId Int
   card   Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
 }
