@@ -17,14 +17,17 @@ export class BoardMemberService {
     });
   }
 
-  async addMember(boardId: number, userId: number, role = 'member') {
+  async addMemberByEmail(boardId: number, email: string, role = 'member') {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) throw new NotFoundException('User with this email not found');
+
     const existing = await this.prisma.boardMember.findUnique({
-      where: { userId_boardId: { userId, boardId } },
+      where: { userId_boardId: { userId: user.id, boardId } },
     });
     if (existing) throw new ConflictException('User is already a member');
 
     return this.prisma.boardMember.create({
-      data: { userId, boardId, role },
+      data: { userId: user.id, boardId, role },
       include: { user: { select: { id: true, email: true, name: true } } },
     });
   }

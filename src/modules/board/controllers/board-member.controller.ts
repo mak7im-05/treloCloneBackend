@@ -40,7 +40,7 @@ export class BoardMemberController {
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() dto: AddMemberDto,
   ) {
-    return this.boardMemberService.addMember(boardId, dto.userId, dto.role);
+    return this.boardMemberService.addMemberByEmail(boardId, dto.email, dto.role);
   }
 
   @Patch('boards/:boardId/members/:userId')

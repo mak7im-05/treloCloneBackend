@@ -1,10 +1,10 @@
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AddMemberDto {
-  @ApiProperty()
-  @IsInt()
-  userId: number;
+  @ApiProperty({ example: 'user@example.com' })
+  @IsString()
+  email: string;
 
   @ApiProperty({ required: false, default: 'member' })
   @IsOptional()
