@@ -6,6 +6,7 @@ import { BoardModule } from './modules/board/board.module';
 import { ListModule } from './modules/list/list.module';
 import { CardModule } from './modules/card/card.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { AppGraphQLModule } from './modules/graphql/graphql.module';
 
 @Module({
   imports: [
@@ -16,6 +17,7 @@ import { CommentModule } from './modules/comment/comment.module';
     ListModule,
     CardModule,
     CommentModule,
+    AppGraphQLModule,
   ],
 })
 export class AppModule {}
