@@ -15,4 +15,122 @@ model User {
   name      String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  ownedBoards   Board[]        @relation("BoardOwner")
+  memberBoards  BoardMember[]
+  assignedCards CardAssignee[]
+  comments      Comment[]
+}
+
+model Board {
+  id        Int      @id @default(autoincrement())
+  title     String
+  color     String?
+  imageUrl  String?
+  isStarred Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  ownerId Int
+  owner   User @relation("BoardOwner", fields: [ownerId], references: [id], onDelete: Cascade)
+
+  lists   List[]
+  labels  Label[]
+  members BoardMember[]
+}
+
+model BoardMember {
+  id   Int @id @default(autoincrement())
+  role String @default("member")
+
+  userId  Int
+  user    User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  boardId Int
+  board   Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, boardId])
+}
+
+model List {
+  id    Int    @id @default(autoincrement())
+  title String
+  order Int    @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  boardId Int
+  board   Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  cards Card[]
+}
+
+model Card {
+  id          Int      @id @default(autoincrement())
+  title       String
+  description String?
+  status      String   @default("todo")
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  listId Int
+  list   List @relation(fields: [listId], references: [id], onDelete: Cascade)
+
+  comments    Comment[]
+  attachments Attachment[]
+  assignees   CardAssignee[]
+  labels      CardLabel[]
+}
+
+model Comment {
+  id        Int      @id @default(autoincrement())
+  body      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  cardId Int
+  card   Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  authorId Int
+  author   User @relation(fields: [authorId], references: [id], onDelete: Cascade)
+}
+
+model Label {
+  id    Int    @id @default(autoincrement())
+  name  String
+  color String
+
+  boardId Int
+  board   Board @relation(fields: [boardId], references: [id], onDelete: Cascade)
+
+  cards CardLabel[]
+}
+
+model CardLabel {
+  cardId  Int
+  card    Card  @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  labelId Int
+  label   Label @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, labelId])
+}
+
+model CardAssignee {
+  cardId Int
+  card   Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId Int
+  user   User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([cardId, userId])
+}
+
+model Attachment {
+  id        Int      @id @default(autoincrement())
+  filename  String
+  url       String
+  createdAt DateTime @default(now())
+
+  cardId Int
+  card   Card @relation(fields: [cardId], references: [id], onDelete: Cascade)
 }
