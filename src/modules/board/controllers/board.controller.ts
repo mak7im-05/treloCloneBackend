@@ -12,6 +12,8 @@ import {
 } from '@nestjs/common';
 import { ApiTags, ApiBearerAuth } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
+import { BoardRoleGuard } from '../guards/board-role.guard';
+import { Roles } from '../decorators/roles.decorator';
 import { BoardService } from '../services/board.service';
 import { CreateBoardDto } from '../dto/create-board.dto';
 import { UpdateBoardDto } from '../dto/update-board.dto';
@@ -38,16 +40,21 @@ export class BoardController {
   }
 
   @Get(':id')
+  @UseGuards(BoardRoleGuard)
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.boardService.findOne(id);
   }
 
   @Patch(':id')
+  @UseGuards(BoardRoleGuard)
+  @Roles('admin', 'member')
   update(@Param('id', ParseIntPipe) id: number, @Body() dto: UpdateBoardDto) {
     return this.boardService.update(id, dto);
   }
 
   @Delete(':id')
+  @UseGuards(BoardRoleGuard)
+  @Roles('admin')
   remove(@Param('id', ParseIntPipe) id: number) {
     return this.boardService.remove(id);
   }
