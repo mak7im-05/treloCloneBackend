@@ -1,9 +1,9 @@
-import { IsInt, IsOptional, IsString } from 'class-validator';
+import { IsEmail, IsInt, IsOptional, IsString } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class AddMemberDto {
   @ApiProperty({ example: 'user@example.com' })
-  @IsString()
+  @IsEmail()
   email: string;
 
   @ApiProperty({ required: false, default: 'member' })
