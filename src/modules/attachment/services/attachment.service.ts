@@ -1,13 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { S3Service } from './s3.service';
 
 @Injectable()
 export class AttachmentService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private s3: S3Service,
+  ) {}
 
-  async create(cardId: number, filename: string, url: string) {
+  async upload(cardId: number, file: Express.Multer.File) {
+    const url = await this.s3.upload(file);
     return this.prisma.attachment.create({
-      data: { filename, url, cardId },
+      data: { filename: file.originalname, url, cardId },
     });
   }
 
@@ -23,6 +28,8 @@ export class AttachmentService {
       where: { id },
     });
     if (!attachment) throw new NotFoundException('Attachment not found');
+
+    await this.s3.delete(attachment.url);
     return this.prisma.attachment.delete({ where: { id } });
   }
 }

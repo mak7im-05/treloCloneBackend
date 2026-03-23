@@ -27,13 +27,12 @@ export class BoardRoleGuard implements CanActivate {
     }>();
     const userId = request.user.id;
 
-    // Extract boardId from route params (supports :boardId, :id for board routes)
     const boardId =
       parseInt(request.params['boardId']) ||
       parseInt(request.params['id']) ||
       0;
 
-    if (!boardId) return true; // No board context, skip
+    if (!boardId) return true;
 
     const role = await this.boardMemberService.getMemberRole(boardId, userId);
 
@@ -41,7 +40,6 @@ export class BoardRoleGuard implements CanActivate {
       throw new ForbiddenException('You are not a member of this board');
     }
 
-    // If no specific roles required, just being a member is enough
     if (!requiredRoles || requiredRoles.length === 0) return true;
 
     if (!requiredRoles.includes(role)) {

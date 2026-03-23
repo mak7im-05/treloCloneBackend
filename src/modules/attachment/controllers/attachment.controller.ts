@@ -10,8 +10,6 @@ import {
   ParseIntPipe,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { diskStorage } from 'multer';
-import { extname } from 'path';
 import { ApiTags, ApiBearerAuth, ApiConsumes } from '@nestjs/swagger';
 import { JwtAuthGuard } from '../../auth/guards/jwt-auth.guard';
 import { AttachmentService } from '../services/attachment.service';
@@ -27,13 +25,6 @@ export class AttachmentController {
   @ApiConsumes('multipart/form-data')
   @UseInterceptors(
     FileInterceptor('file', {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (_req, file, cb) => {
-          const unique = `${Date.now()}-${Math.round(Math.random() * 1e9)}`;
-          cb(null, `${unique}${extname(file.originalname)}`);
-        },
-      }),
       limits: { fileSize: 10 * 1024 * 1024 },
     }),
   )
@@ -41,8 +32,7 @@ export class AttachmentController {
     @Param('cardId', ParseIntPipe) cardId: number,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    const url = `/uploads/${file.filename}`;
-    return this.attachmentService.create(cardId, file.originalname, url);
+    return this.attachmentService.upload(cardId, file);
   }
 
   @Get('cards/:cardId/attachments')

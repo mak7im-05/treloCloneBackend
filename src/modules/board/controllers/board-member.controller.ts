@@ -27,8 +27,6 @@ import {
 export class BoardMemberController {
   constructor(private boardMemberService: BoardMemberService) {}
 
-  // ─── Members ──────────────────────────────────────────────────────
-
   @Get('boards/:boardId/members')
   getMembers(@Param('boardId', ParseIntPipe) boardId: number) {
     return this.boardMemberService.getMembers(boardId);
@@ -61,8 +59,6 @@ export class BoardMemberController {
   ) {
     return this.boardMemberService.removeMember(boardId, userId);
   }
-
-  // ─── Card Assignment ──────────────────────────────────────────────
 
   @Get('cards/:cardId/assignees')
   getAssignees(@Param('cardId', ParseIntPipe) cardId: number) {

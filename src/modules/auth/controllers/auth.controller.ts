@@ -4,6 +4,7 @@ import { AuthService } from '../services/auth.service';
 import { JwtAuthGuard } from '../guards/jwt-auth.guard';
 import { RegisterDto } from '../dto/register.dto';
 import { LoginDto } from '../dto/login.dto';
+import { RefreshDto } from '../dto/refresh.dto';
 import { Request } from 'express';
 
 @ApiTags('Auth')
@@ -19,6 +20,16 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto.email, dto.password);
+  }
+
+  @Post('refresh')
+  refresh(@Body() dto: RefreshDto) {
+    return this.authService.refresh(dto.refresh_token);
+  }
+
+  @Post('logout')
+  logout(@Body() dto: RefreshDto) {
+    return this.authService.logout(dto.refresh_token);
   }
 
   @ApiBearerAuth()
