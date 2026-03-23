@@ -11,6 +11,7 @@ import { CommentModule } from './modules/comment/comment.module';
 import { AppGraphQLModule } from './modules/graphql/graphql.module';
 import { AttachmentModule } from './modules/attachment/attachment.module';
 import { SearchModule } from './modules/search/search.module';
+import { LabelModule } from './modules/label/label.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { SearchModule } from './modules/search/search.module';
     AppGraphQLModule,
     AttachmentModule,
     SearchModule,
+    LabelModule,
   ],
 })
 export class AppModule {}
