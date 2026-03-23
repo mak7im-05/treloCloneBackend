@@ -38,7 +38,11 @@ export class BoardMemberController {
     @Param('boardId', ParseIntPipe) boardId: number,
     @Body() dto: AddMemberDto,
   ) {
-    return this.boardMemberService.addMemberByEmail(boardId, dto.email, dto.role);
+    return this.boardMemberService.addMemberByEmail(
+      boardId,
+      dto.email,
+      dto.role,
+    );
   }
 
   @Patch('boards/:boardId/members/:userId')
