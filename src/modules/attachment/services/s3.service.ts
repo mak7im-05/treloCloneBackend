@@ -26,7 +26,7 @@ export class S3Service {
           Authorization: `Bearer ${this.supabaseKey}`,
           'Content-Type': file.mimetype,
         },
-        body: file.buffer,
+        body: new Uint8Array(file.buffer),
       },
     );
 
