@@ -1,64 +1,58 @@
 import { Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from '@aws-sdk/client-s3';
 import { randomBytes } from 'crypto';
 import { extname } from 'path';
 
 @Injectable()
 export class S3Service {
-  private client: S3Client;
+  private supabaseUrl: string;
+  private supabaseKey: string;
   private bucket: string;
-  private region: string;
 
   constructor(private config: ConfigService) {
-    this.region = this.config.get<string>('AWS_REGION', 'eu-north-1');
-    this.bucket = this.config.get<string>('AWS_S3_BUCKET', '');
-
-    this.client = new S3Client({
-      region: this.region,
-      credentials: {
-        accessKeyId: this.config.get<string>('AWS_ACCESS_KEY_ID', ''),
-        secretAccessKey: this.config.get<string>('AWS_SECRET_ACCESS_KEY', ''),
-      },
-    });
+    this.supabaseUrl = this.config.get<string>('SUPABASE_URL', '');
+    this.supabaseKey = this.config.get<string>('SUPABASE_SERVICE_KEY', '');
+    this.bucket = this.config.get<string>('SUPABASE_BUCKET', 'attachments');
   }
 
   async upload(file: Express.Multer.File): Promise<string> {
-    const key = `attachments/${Date.now()}-${randomBytes(8).toString('hex')}${extname(file.originalname)}`;
+    const name = `${Date.now()}-${randomBytes(8).toString('hex')}${extname(file.originalname)}`;
 
-    await this.client.send(
-      new PutObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-        Body: file.buffer,
-        ContentType: file.mimetype,
-      }),
+    const res = await fetch(
+      `${this.supabaseUrl}/storage/v1/object/${this.bucket}/${name}`,
+      {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${this.supabaseKey}`,
+          'Content-Type': file.mimetype,
+        },
+        body: file.buffer,
+      },
     );
 
-    return `https://${this.bucket}.s3.${this.region}.amazonaws.com/${key}`;
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Supabase upload failed: ${err}`);
+    }
+
+    return `${this.supabaseUrl}/storage/v1/object/public/${this.bucket}/${name}`;
   }
 
   async delete(url: string): Promise<void> {
-    const key = this.extractKey(url);
-    if (!key) return;
+    const prefix = `/storage/v1/object/public/${this.bucket}/`;
+    const idx = url.indexOf(prefix);
+    if (idx === -1) return;
 
-    await this.client.send(
-      new DeleteObjectCommand({
-        Bucket: this.bucket,
-        Key: key,
-      }),
+    const fileName = url.slice(idx + prefix.length);
+
+    await fetch(
+      `${this.supabaseUrl}/storage/v1/object/${this.bucket}/${fileName}`,
+      {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${this.supabaseKey}`,
+        },
+      },
     );
-  }
-
-  private extractKey(url: string): string | null {
-    const prefix = `https://${this.bucket}.s3.${this.region}.amazonaws.com/`;
-    if (url.startsWith(prefix)) {
-      return url.slice(prefix.length);
-    }
-    return null;
   }
 }
